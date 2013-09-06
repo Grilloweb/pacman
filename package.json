@@ -1,0 +1,16 @@
+{
+    "name"		: "chat-socket-io",
+    "version"	: "0.0.1",
+	"private"	: false,
+	"author"	: "Leonardo Grillo - Projeto Pacman",
+	"engines"	: { "node" : "0.8.x", "npm" : "1.1.x" },
+	"scripts"	: { "start": "./node_modules/.bin/nodemon app.js" },
+    "dependencies": {
+        "express"	: "latest",
+        "moment"	: "latest",
+        "mongoose"	: "latest",
+        "async"		: "latest",
+        "jade"      : "latest",
+        "socket.io" : "0.8.7"
+    }
+}
