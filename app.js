@@ -10,6 +10,7 @@ var http = require('http');
 var path = require('path');
 
 var app = express();
+var server = http.createServer(app);
 
 // all environments
 app.set('port', process.env.PORT || 3000);
@@ -31,6 +32,21 @@ if ('development' == app.get('env')) {
 app.get('/', routes.index);
 app.get('/users', user.list);
 
-http.createServer(app).listen(app.get('port'), function(){
+//inicia a troca de informações
+var io = require('socket.io').listen(server);
+
+io.sockets.on('connection', function (socket) 
+{
+	// console.log(socket.id);
+	console.log(io.sockets.sockets[socket.id]);
+	socket.on('movimento', function (data)
+	{
+		socket.emit('movimento', data);
+	});
+
+});
+
+
+server.listen(3000, function(){
   console.log('Express server listening on port ' + app.get('port'));
 });

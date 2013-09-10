@@ -8,14 +8,16 @@ Pac =
 	ctx 			: canvas.getContext('2d'),
 	tamanhoBoneco 	: 10,
 	tamanhoPasso 	: 5,
-	velocidadeBoneco: 100,
+	velocidadeBoneco: 1000,
 	alturaCenario 	: $(canvas).height(),
 	larguraCenario	: $(canvas).width(),
 	posicaoBoneco	: {s:'b',x:0,y:0},
+    socket 			: io.connect('http://10.46.9.59:3000'),
 
 	//inicializador do projeto
 	init : function()
 	{
+		Pac.Pega.init();
 		Pac.movimentaBoneco();
 	},
 
@@ -76,9 +78,8 @@ Pac =
 					break;
 			}
 			
-			console.log(Pac.posicaoBoneco, seta);		
-
 			Pac.boneco(Pac.posicaoBoneco.x,Pac.posicaoBoneco.y);
+			Pac.Seta.movimento(Pac.posicaoBoneco);
 		
 		}, Pac.velocidadeBoneco);
 	},
@@ -126,7 +127,32 @@ Pac =
 		this.ctx.rect(0, 0, this.alturaCenario, this.larguraCenario);
 		this.ctx.closePath();
 		this.ctx.fill();
-	}	
+	},
+
+	Seta :
+	{
+		init : function()
+		{
+
+		},
+
+		movimento : function(posicaoBoneco)
+		{
+			Pac.socket.emit('movimento', posicaoBoneco );
+		}
+	},
+
+	Pega : 
+	{
+		init : function()
+		{
+			Pac.socket.on('movimento', function (data) {
+				console.log(data);
+			});
+
+			// Pac.socket.emit('movimento', { posicaoBoneco: data });
+		}
+	}
 }
 
 $(function()
