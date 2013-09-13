@@ -13,7 +13,7 @@ var app = express();
 var server = http.createServer(app);
 
 // all environments
-app.set('port', process.env.PORT || 3000);
+app.set('port', process.env.PORT || 3001);
 app.set('views', __dirname + '/views');
 app.set('view engine', 'jade');
 app.use(express.favicon());
@@ -32,21 +32,46 @@ if ('development' == app.get('env')) {
 app.get('/', routes.index);
 app.get('/users', user.list);
 
-//inicia a troca de informações
+//INICIA a troca de informações
+var players = {data: []};
 var io = require('socket.io').listen(server);
 
 io.sockets.on('connection', function (socket) 
 {
-	// console.log(socket.id);
-	console.log(io.sockets.sockets[socket.id]);
+	var meuID = socket.id;
+	players.data.push({id: meuID, posicao:false});
+
 	socket.on('movimento', function (data)
 	{
-		socket.emit('movimento', data);
+		for(var i =0; i < players.data.length; i++)
+		{
+			if(players.data[i].id == meuID)
+				players.data[i].posicao = data;
+		}
+
+		var p = true;
+
+		for(var i =0; i < players.data.length; i++)
+		{
+			if(players.data[i].posicao == false)
+			{
+				p = false;
+				break;
+			}
+		}
+
+		if(p)
+		{
+			for(var i =0; i < players.data.length; i++)
+			{
+				io.sockets.socket(players.data[i].id).emit('movimento2', players);
+			}
+		}
 	});
 
 });
+//FINAMIZA a troca de informações
 
-
-server.listen(3000, function(){
+server.listen(3001, function(){
   console.log('Express server listening on port ' + app.get('port'));
 });

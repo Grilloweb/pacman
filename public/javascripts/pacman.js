@@ -8,11 +8,11 @@ Pac =
 	ctx 			: canvas.getContext('2d'),
 	tamanhoBoneco 	: 10,
 	tamanhoPasso 	: 5,
-	velocidadeBoneco: 1000,
+	velocidadeBoneco: 100,
 	alturaCenario 	: $(canvas).height(),
 	larguraCenario	: $(canvas).width(),
 	posicaoBoneco	: {s:'b',x:0,y:0},
-    socket 			: io.connect('http://10.46.9.59:3000'),
+    socket 			: io.connect('http://10.46.9.59:3001'),
 
 	//inicializador do projeto
 	init : function()
@@ -36,7 +36,6 @@ Pac =
 
 		setInterval(function()
 		{
-			Pac.limpaTela();
 
 			switch (seta || Pac.posicaoBoneco.s)
 			{
@@ -78,7 +77,7 @@ Pac =
 					break;
 			}
 			
-			Pac.boneco(Pac.posicaoBoneco.x,Pac.posicaoBoneco.y);
+			// Pac.boneco(Pac.posicaoBoneco.x,Pac.posicaoBoneco.y);
 			Pac.Seta.movimento(Pac.posicaoBoneco);
 		
 		}, Pac.velocidadeBoneco);
@@ -110,14 +109,19 @@ Pac =
 	},
 
 	//metodo com o desenho de 1 box do cenario
-	boneco : function(x, y)
+	boneco : function(players)
 	{
-	    this.ctx.beginPath(); // inicia um desenho.
-	    this.ctx.fillStyle = 'blue'; // especifica a cor de preenchimento.
-	    this.ctx.strokeStyle = 'red'; // especifica a cor de contorno.
-	    this.ctx.rect(x, y, this.tamanhoBoneco, this.tamanhoBoneco); // especifica um retângulo.
-	    this.ctx.stroke(); // contorna o desenho (dois retângulos).
-	    this.ctx.fill(); // preenche o desenho (dois retângulos).    
+		Pac.limpaTela();
+console.log(players, players.data.length);
+		for(var i =0; i < players.data.length; i++)
+		{
+			this.ctx.beginPath(); // inicia um desenho.
+		    this.ctx.fillStyle = 'blue'; // especifica a cor de preenchimento.
+		    this.ctx.strokeStyle = 'red'; // especifica a cor de contorno.
+		    this.ctx.rect(players.data[i].posicao.x, players.data[i].posicao.y, this.tamanhoBoneco, this.tamanhoBoneco); // especifica um retângulo.
+		    this.ctx.stroke(); // contorna o desenho (dois retângulos).
+		    this.ctx.fill(); // preenche o desenho (dois retângulos).    
+		}
 
 	},
 
@@ -146,8 +150,9 @@ Pac =
 	{
 		init : function()
 		{
-			Pac.socket.on('movimento', function (data) {
-				console.log(data);
+			Pac.socket.on('movimento2', function (players) {
+				// console.log(data);
+				Pac.boneco(players);
 			});
 
 			// Pac.socket.emit('movimento', { posicaoBoneco: data });
