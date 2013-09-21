@@ -17,6 +17,7 @@ Pac =
 	//inicializador do projeto
 	init : function()
 	{
+		Pac.Seta.init();
 		Pac.Pega.init();
 		Pac.movimentaBoneco();
 	},
@@ -28,62 +29,14 @@ Pac =
 
 		$(document).on('keydown', function(e)
 		{
-			seta = Pac.setas(e.keyCode);
+			seta = Pac.posicao(e.keyCode);
 
-			if(seta == false)
-				seta = Pac.posicaoBoneco.s;
+			if(seta)
+				Pac.Seta.movimento(seta);
 		});
-
-		setInterval(function()
-		{
-
-			switch (seta || Pac.posicaoBoneco.s)
-			{
-				case 'e' :
-					var x = Pac.posicaoBoneco.x - Pac.tamanhoBoneco;
-					if(x < 0)
-						x = Pac.larguraCenario - Pac.tamanhoBoneco;
-					else
-						x = Pac.posicaoBoneco.x - Pac.tamanhoBoneco;
-
-					Pac.posicaoBoneco = {s:seta, x:x, y:Pac.posicaoBoneco.y};
-					break;
-				case 'c' :
-					var y = Pac.posicaoBoneco.y - Pac.tamanhoBoneco;
-					if(y < 0)
-						y = Pac.alturaCenario - Pac.tamanhoBoneco;
-					else
-						y = Pac.posicaoBoneco.y - Pac.tamanhoBoneco;
-
-					Pac.posicaoBoneco = {s:seta, x:Pac.posicaoBoneco.x, y:y};
-					break;
-				case 'd' :
-					var x = Pac.posicaoBoneco.x + Pac.tamanhoBoneco;
-					if(x >= Pac.larguraCenario)
-						x = 0 + Pac.tamanhoBoneco;
-					else
-						x = Pac.posicaoBoneco.x + Pac.tamanhoBoneco;
-
-					Pac.posicaoBoneco = {s:seta, x:x, y:Pac.posicaoBoneco.y};
-					break;
-				case 'b' :
-					var y = Pac.posicaoBoneco.y + Pac.tamanhoBoneco;
-					if(y >= Pac.alturaCenario)
-						y = 0 + Pac.tamanhoBoneco;
-					else
-						y = Pac.posicaoBoneco.y + Pac.tamanhoBoneco;
-
-					Pac.posicaoBoneco = {s:seta, x:Pac.posicaoBoneco.x, y:y};
-					break;
-			}
-			
-			// Pac.boneco(Pac.posicaoBoneco.x,Pac.posicaoBoneco.y);
-			Pac.Seta.movimento(Pac.posicaoBoneco);
-		
-		}, Pac.velocidadeBoneco);
 	},
 
-	setas : function(keycode)
+	posicao : function(keycode)
 	{
 		var seta = false;
 
@@ -112,11 +65,12 @@ Pac =
 	boneco : function(players)
 	{
 		Pac.limpaTela();
-console.log(players, players.data.length);
+
+			// console.log(players);
 		for(var i =0; i < players.data.length; i++)
 		{
 			this.ctx.beginPath(); // inicia um desenho.
-		    this.ctx.fillStyle = 'blue'; // especifica a cor de preenchimento.
+		    this.ctx.fillStyle = players.data[i].cor; // especifica a cor de preenchimento.
 		    this.ctx.strokeStyle = 'red'; // especifica a cor de contorno.
 		    this.ctx.rect(players.data[i].posicao.x, players.data[i].posicao.y, this.tamanhoBoneco, this.tamanhoBoneco); // especifica um retângulo.
 		    this.ctx.stroke(); // contorna o desenho (dois retângulos).
@@ -137,12 +91,12 @@ console.log(players, players.data.length);
 	{
 		init : function()
 		{
-
+			// Pac.socket.emit('propriedades', {altura: Pac.alturaCenario, largura: Pac.larguraCenario})
 		},
 
-		movimento : function(posicaoBoneco)
+		movimento : function(seta)
 		{
-			Pac.socket.emit('movimento', posicaoBoneco );
+			Pac.socket.emit('direcao', seta );
 		}
 	},
 
@@ -150,8 +104,7 @@ console.log(players, players.data.length);
 	{
 		init : function()
 		{
-			Pac.socket.on('movimento2', function (players) {
-				// console.log(data);
+			Pac.socket.on('movimento', function (players) {
 				Pac.boneco(players);
 			});
 

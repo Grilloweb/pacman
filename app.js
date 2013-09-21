@@ -38,38 +38,100 @@ var io = require('socket.io').listen(server);
 
 io.sockets.on('connection', function (socket) 
 {
-	var meuID = socket.id;
-	players.data.push({id: meuID, posicao:false});
+	var meuID 				= socket.id;
+	var randomColor 		= Math.floor(Math.random()*16777215).toString(16);
+	var tamanhoBoneco 		= 10;
+	var tamanhoPasso 		= 5;
+	var velocidadeBoneco 	= 1000;
+	var alturaCenario 		= 400;
+	var larguraCenario 		= 400;
+	var posicaoBoneco		= {s:'b',x:0,y:0};
 
-	socket.on('movimento', function (data)
+	players.data.push({id: meuID, cor:randomColor, posicao:posicaoBoneco});
+
+	socket.on('direcao', function (seta)
 	{
 		for(var i =0; i < players.data.length; i++)
 		{
 			if(players.data[i].id == meuID)
-				players.data[i].posicao = data;
+				players.data[i].posicao.s = seta;
 		}
 
-		var p = true;
-
-		for(var i =0; i < players.data.length; i++)
-		{
-			if(players.data[i].posicao == false)
-			{
-				p = false;
-				break;
-			}
-		}
-
-		if(p)
-		{
-			for(var i =0; i < players.data.length; i++)
-			{
-				io.sockets.socket(players.data[i].id).emit('movimento2', players);
-			}
-		}
 	});
 
+	setInterval(function()
+	{
+		for(var i =0; i < players.data.length; i++)
+		{
+			var posicao = players.data[i].posicao;
+
+			if(players.data[i].id == meuID)
+			{
+				switch (posicao.s)
+				{
+					case 'e' :
+						var x = posicao.x - tamanhoBoneco;
+						if(x < 0)
+							x = larguraCenario - tamanhoBoneco;
+						else
+							x = posicao.x - tamanhoBoneco;
+
+						players.data[i].posicao = {s:posicao.s, x:x, y:posicao.y};
+						break;
+					
+					case 'c' :
+						var y = posicao.y - tamanhoBoneco;
+						if(y < 0)
+							y = alturaCenario - tamanhoBoneco;
+						else
+							y = posicao.y - tamanhoBoneco;
+
+						players.data[i].posicao = {s:posicao.s, x:posicao.x, y:y};
+						break;
+					
+					case 'd' :
+						var x = posicao.x + tamanhoBoneco;
+						if(x >= larguraCenario)
+							x = 0 + tamanhoBoneco;
+						else
+							x = posicao.x + tamanhoBoneco;
+
+						players.data[i].posicao = {s:posicao.s, x:x, y:posicao.y};
+						break;
+					
+					case 'b' :
+						var y = posicao.y + tamanhoBoneco;
+						if(y >= alturaCenario)
+							y = 0 + tamanhoBoneco;
+						else
+							y = posicao.y + tamanhoBoneco;
+
+						players.data[i].posicao = {s:posicao.s, x:posicao.x, y:y};
+						break;
+				}
+
+				colisao(players.data[i].posicao);
+			}
+		}
+
+		socket.emit('movimento', players);
+	
+	}, velocidadeBoneco);
+
+	var colisao = function(player)
+	{
+		for(var i =0; i < players.data.length; i++)
+		{
+			if(players.data[i].id != meuID && players.data[i].posicao.x == player.x && players.data[i].posicao.y == player.y)
+			{
+				console.log('COLISAO');
+			}
+		}
+	}
+
+
 });
+
 //FINAMIZA a troca de informações
 
 server.listen(3001, function(){
