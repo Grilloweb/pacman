@@ -57,7 +57,8 @@ io.sockets.on('connection', function (socket)
 				players.data[i].posicao.s = seta;
 		}
 
-	});
+	});  
+	console.log(' AAAAAA ');
 
 	setInterval(function()
 	{
